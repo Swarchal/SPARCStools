@@ -56,7 +56,7 @@ def parse_phenix(
         index_file = os.path.join(input_dir, "index.flex.xml")
     else:
         input_dir = os.path.join(phenix_dir, "Images")
-        index_file = os.path.join(input_dir, "Index.idx.xml")
+        index_file = os.path.join(input_dir, "Index.xml")
 
     lookuppath = os.path.join(input_dir, "lookup.csv")
     outfile = os.path.join(input_dir, "parsed_index.txt")
@@ -315,7 +315,7 @@ def parse_phenix_40X_slide(
         index_file = os.path.join(input_dir, "index.flex.xml")
     else:
         input_dir = os.path.join(phenix_dir, "Images")
-        index_file = os.path.join(input_dir, "Index.idx.xml")
+        index_file = os.path.join(input_dir, "Index.xml")
 
     outdir = os.path.join(phenix_dir, "parsed_images_40X")
     if downsampled:
