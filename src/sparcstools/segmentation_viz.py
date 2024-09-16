@@ -5,15 +5,17 @@ segmentation_viz: visualization of segmentation results
 Collection of functions to easily check quality of segmentation results.
 """
 
-#import library
-import numpy as np
 import os
-import zarr
-import h5py
-from ome_zarr.io import parse_url
-from ome_zarr.writer import write_image, write_labels, write_label_metadata
 
-#define functions for this
+import h5py
+# import library
+import numpy as np
+import zarr
+from ome_zarr.io import parse_url
+from ome_zarr.writer import write_image, write_label_metadata, write_labels
+
+
+# define functions for this
 def plot_segmentation_wells(segmentation, cellids_keep):
     """Helper function which generates a masked array where only the selected cell_ids are kept and all other values are set to 0.
 
@@ -30,17 +32,20 @@ def plot_segmentation_wells(segmentation, cellids_keep):
     inverse = list(all_classes - cellids_keep)
     inverse = np.array(inverse)
 
-    mask_values = np.isin(segmentation, inverse, invert = False)
+    mask_values = np.isin(segmentation, inverse, invert=False)
     masked = np.ma.masked_array(segmentation, mask=mask_values)
     masked = masked.filled(0)
 
-    return(masked)
+    return masked
 
-def write_zarr_with_seg(image, 
-                        segmentation,  #list of all sets you want to visualize
-                        segmentation_names, #list of what each cell set should be called
-                        outpath, 
-                        channels =["Channel1", "channel2", "channel3"],):
+
+def write_zarr_with_seg(
+    image,
+    segmentation,  # list of all sets you want to visualize
+    segmentation_names,  # list of what each cell set should be called
+    outpath,
+    channels=["Channel1", "channel2", "channel3"],
+):
     """Generate an ome.zarr from an image file and segmentation masks.
 
     Parameters
@@ -59,29 +64,50 @@ def write_zarr_with_seg(image,
 
     path = outpath
     loc = parse_url(path, mode="w").store
-    group = zarr.group(store = loc)
+    group = zarr.group(store=loc)
 
-    channel_colors = ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"]
+    channel_colors = [
+        "#e60049",
+        "#0bb4ff",
+        "#50e991",
+        "#e6d800",
+        "#9b19f5",
+        "#ffa300",
+        "#dc0ab4",
+        "#b3d4ff",
+        "#00bfa0",
+    ]
 
     group.attrs["omero"] = {
         "name": "segmentation.ome.zarr",
-        "channels": [{"label":channel, "color":channel_colors[i], "active":True} for i, channel in enumerate(channels)]
+        "channels": [
+            {"label": channel, "color": channel_colors[i], "active": True}
+            for i, channel in enumerate(channels)
+        ],
     }
 
-    write_image(image, group = group, axes = "cyx", storage_options=dict(chunks=(1, 1024, 1024)))
+    write_image(
+        image, group=group, axes="cyx", storage_options=dict(chunks=(1, 1024, 1024))
+    )
 
-    #add segmentation labels
+    # add segmentation labels
     for seg, name in zip(segmentation, segmentation_names):
-        write_labels(labels = seg.astype("uint16"), group = group, name = name, axes = "cyx")
-        write_label_metadata(group = group, name = f"labels/{name}", colors = [{"label-value": 0, "rgba": [0, 0, 0, 0]}])
+        write_labels(labels=seg.astype("uint16"), group=group, name=name, axes="cyx")
+        write_label_metadata(
+            group=group,
+            name=f"labels/{name}",
+            colors=[{"label-value": 0, "rgba": [0, 0, 0, 0]}],
+        )
 
-def add_seg(segmentation,  #list of all sets you want to visualize
-            segmentation_names, #list of what each cell set should be called
-            outpath):
-    
+
+def add_seg(
+    segmentation,  # list of all sets you want to visualize
+    segmentation_names,  # list of what each cell set should be called
+    outpath,
+):
     """
     Function to add segmentation to existing zarr file.
-    
+
     Parameters
     ----------
     segmentation
@@ -94,14 +120,18 @@ def add_seg(segmentation,  #list of all sets you want to visualize
 
     path = outpath
     loc = parse_url(path, mode="w").store
-    group = zarr.group(store = loc)
+    group = zarr.group(store=loc)
 
     for seg, name in zip(segmentation, segmentation_names):
-        write_labels(labels = seg.astype("uint16"), group = group, name = name, axes = "cyx")
-        write_label_metadata(group = group, name = f"labels/{name}", colors = [{"label-value": 0, "rgba": [0, 0, 0, 0]}])
+        write_labels(labels=seg.astype("uint16"), group=group, name=name, axes="cyx")
+        write_label_metadata(
+            group=group,
+            name=f"labels/{name}",
+            colors=[{"label-value": 0, "rgba": [0, 0, 0, 0]}],
+        )
 
-    
-def sparcspy_add_seg(stitched_path, project_location, nuclei = True, cytosol = True):
+
+def sparcspy_add_seg(stitched_path, project_location, nuclei=True, cytosol=True):
     """
     Add segmentations generated in SPARCSpy easily to an exisiting ome.zarr or generate a new one.
 
@@ -122,7 +152,7 @@ def sparcspy_add_seg(stitched_path, project_location, nuclei = True, cytosol = T
     seg_labels = []
 
     segmentation = os.path.join(project_location, "segmentation", "segmentation.h5")
-    hdf5 = h5py.File(segmentation, "r") 
+    hdf5 = h5py.File(segmentation, "r")
 
     if nuclei:
         nuclei_seg = hdf5["labels"][0, :, :]
@@ -134,15 +164,19 @@ def sparcspy_add_seg(stitched_path, project_location, nuclei = True, cytosol = T
         segs.append(cytosol_seg)
         seg_labels.append("cytosol")
 
-    #check if the ome.zarr already exists if not create
+    # check if the ome.zarr already exists if not create
 
     if not os.path.isfile(stitched_path):
-        print("no output file found will extract imaging data and generate a new ome.zarr")
+        print(
+            "no output file found will extract imaging data and generate a new ome.zarr"
+        )
         channels = hdf5["channels"][:, :, :]
 
-        write_zarr_with_seg(channels,
-                            segs,  #list of all sets you want to visualize
-                            seg_labels, #list of what each cell set should be called
-                            stitched_path)
+        write_zarr_with_seg(
+            channels,
+            segs,  # list of all sets you want to visualize
+            seg_labels,  # list of what each cell set should be called
+            stitched_path,
+        )
     else:
         add_seg(segs, seg_labels, stitched_path)
