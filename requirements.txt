@@ -2,7 +2,7 @@ pandas
 tqdm
 ashlar
 zarr
-numpy
+numpy==1.26
 matplotlib
 tifffile
 pillow

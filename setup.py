@@ -33,6 +33,5 @@ setup(name='sparcstools',
       include_package_data=True,
       zip_safe=True,
       install_requires=install_requires,
-      package_dir={"": "src"},
-      packages=find_packages(where="src"),
+      packages=["sparcstools"],
       )

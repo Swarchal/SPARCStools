@@ -315,6 +315,10 @@ def generate_stitched(
 
     start_time = time.time()
 
+    valid_filetypes = [".tif", ".ome.zarr", ".ome.tif", "return_array"]
+    if filetype not in valid_filetypes:
+        raise ValueError(f"invalid filetype, options: {valid_filetypes}")
+
     # convert relativ paths into absolute paths
     outdir = os.path.abspath(outdir)
 

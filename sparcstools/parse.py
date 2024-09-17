@@ -115,9 +115,7 @@ def parse_phenix(
                 x_positions.append(float(_line))
             elif line.strip().startswith("<PositionY"):
                 y_positions.append(float(_line))
-            elif line.strip().startswith(
-                "<AbsTime"
-            ):  # relevant for time course experiments
+            elif line.strip().startswith("<AbsTime"):
                 times.append(_line)
             else:
                 print("error")
