@@ -11,6 +11,7 @@ import random
 import shutil
 import subprocess
 import time
+import errno
 from datetime import datetime
 
 import numpy as np
@@ -690,7 +691,7 @@ def sort_wells(parsed_dir, use_symlink=False, assign_random_id=False):
                     try:
                         os.symlink(input, output)
                     except OSError as e:
-                        if e.errno == erro.EEXIST:
+                        if e.errno == errno.EEXIST:
                             os.remove(output)
                             os.symlink(input, output)
 
