@@ -4,6 +4,8 @@ from ashlar import filepattern
 from skimage.filters import gaussian
 from skimage.util import invert
 
+BIT_DEPTH_16 = 2**16
+
 
 class FilePatternReaderRescale(filepattern.FilePatternReader):
 
@@ -29,9 +31,9 @@ class FilePatternReaderRescale(filepattern.FilePatternReader):
         img = skimage.util.img_as_float32(img)
         cutoff1, cutoff2 = rescale_range
         if cutoff_threshold is not None:
-            if img.max() > (cutoff_threshold / 65535):
+            if img.max() > (cutoff_threshold / BIT_DEPTH_16):
                 _img = img.copy()
-                _img[_img > (cutoff_threshold / 65535)] = 0
+                _img[_img > (cutoff_threshold / BIT_DEPTH_16)] = 0
                 p1 = np.percentile(_img, cutoff1)
                 p99 = np.percentile(_img, cutoff2)
             else:
@@ -43,7 +45,7 @@ class FilePatternReaderRescale(filepattern.FilePatternReader):
         img = skimage.exposure.rescale_intensity(
             img, in_range=(p1, p99), out_range=(0, 1)
         )
-        return (img * 65535).astype("uint16")
+        return (img * BIT_DEPTH_16).astype("uint16")
 
     @staticmethod
     def correct_illumination(
@@ -56,9 +58,9 @@ class FilePatternReaderRescale(filepattern.FilePatternReader):
         cutoff1, cutoff2 = rescale_range
         img = skimage.util.img_as_float32(img)
         if cutoff_threshold is not None:
-            if img.max() > (cutoff_threshold / 65535):
+            if img.max() > (cutoff_threshold / BIT_DEPTH_16):
                 _img = img.copy()
-                _img[_img > (cutoff_threshold / 65535)] = 0
+                _img[_img > (cutoff_threshold / BIT_DEPTH_16)] = 0
                 p1 = np.percentile(_img, cutoff1)
                 p99 = np.percentile(_img, cutoff2)
             else:
@@ -91,9 +93,9 @@ class FilePatternReaderRescale(filepattern.FilePatternReader):
                 img_corrected - 0.25 * correction_mask_highs_02
             )
 
-            return (img_corrected_double * 65535).astype("uint16")
+            return (img_corrected_double * BIT_DEPTH_16).astype("uint16")
         else:
-            return (img_corrected * 65535).astype("uint16")
+            return (img_corrected * BIT_DEPTH_16).astype("uint16")
 
     def read(self, series, c):
         img = super().read(series, c)
@@ -145,9 +147,9 @@ class BioformatsReaderRescale(BioformatsReader):
         img = skimage.util.img_as_float32(img)
         cutoff1, cutoff2 = rescale_range
 
-        if img.max() > (40000 / 65535):
+        if img.max() > (40000 / BIT_DEPTH_16):
             _img = img.copy()
-            _img[_img > (10000 / 65535)] = 0
+            _img[_img > (10000 / BIT_DEPTH_16)] = 0
             p1 = np.percentile(_img, cutoff1)
             p99 = np.percentile(_img, cutoff2)
         else:
@@ -157,7 +159,7 @@ class BioformatsReaderRescale(BioformatsReader):
         img = skimage.exposure.rescale_intensity(
             img, in_range=(p1, p99), out_range=(0, 1)
         )
-        return (img * 65535).astype("uint16")
+        return (img * BIT_DEPTH_16).astype("uint16")
 
     def read(self, series, c):
         self.metadata._reader.setSeries(self.metadata.active_series[series])

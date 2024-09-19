@@ -12,6 +12,7 @@ from functools import partial
 import xarray as xr
 from skimage.io import imread, imsave
 
+BIT_DEPTH_16 = 2**16
 
 def _downsample_img(img, N=2):
     """
@@ -26,7 +27,7 @@ def _downsample_img(img, N=2):
         number of pixels that should be binned together using mean between pixels
     """
     downsampled = xr.DataArray(img, dims=["x", "y"]).coarsen(x=N, y=N).mean()
-    downsampled = (downsampled / downsampled.max() * 65535).astype("uint16")
+    downsampled = (downsampled / downsampled.max() * BIT_DEPTH_16).astype("uint16")
     return downsampled
 
 
@@ -47,7 +48,7 @@ def downsample_img(img_path, N=2, copy=False, outdir=None):
     img = imread(img_path)
 
     # downsample and convert back to uint16
-    _downsampled = _downsample_img(img)
+    _downsampled = _downsample_img(img, N)
 
     # write out (overwrite image location)
     if copy:

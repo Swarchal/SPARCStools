@@ -35,7 +35,7 @@ from sparcstools.filereaders import FilePatternReaderRescale
 
 # define custom FilePatternReaderRescale to use with Ashlar to allow for custom modifications to images before performing stitching
 
-
+BIT_DEPTH_16 = 2**16
 
 def _write_xml(path, channels, slidename, cropped=False):
     """Helper function to generate an XML for import of stitched .tifs into BIAS.
@@ -287,7 +287,7 @@ def generate_stitched(
                 p1 = np.percentile(mosaics[i, :, :], cutoff1)
                 p99 = np.percentile(mosaics[i, :, :], cutoff2)
                 mosaics[i, :, :] = (
-                    rescale_intensity(mosaics[i, :, :], (p1, p99), (0, 1)) * 65535
+                    rescale_intensity(mosaics[i, :, :], (p1, p99), (0, 1)) * BIT_DEPTH_16
                 ).astype("uint16")
 
         # perform cropping if crop parameters are specified
