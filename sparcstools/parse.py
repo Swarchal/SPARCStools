@@ -5,13 +5,13 @@ parse
 Contains functions to parse imaging data into a usable formats for downstream pipelines.
 """
 
+import errno
 import glob
 import os
 import random
 import shutil
 import subprocess
 import time
-import errno
 from datetime import datetime
 
 import numpy as np
@@ -71,7 +71,7 @@ def parse_phenix(
     # extract channel names from xml file
     cmd = """grep -E -m 20 '<ChannelName>|<ChannelID>' '""" + index_file + """'"""
     results = (
-        subprocess.check_output(cmd, shell=True).decode("utf-8").strip().split("\r\n")
+        subprocess.check_output(cmd, shell=True).decode("utf-8").strip().splitlines()
     )
 
     results = [x.strip() for x in results]
@@ -333,7 +333,7 @@ def parse_phenix_40X_slide(
     # extract channel names from xml file
     cmd = """grep -E -m 20 '<ChannelName>|<ChannelID>' '""" + index_file + """'"""
     results = (
-        subprocess.check_output(cmd, shell=True).decode("utf-8").strip().split("\r\n")
+        subprocess.check_output(cmd, shell=True).decode("utf-8").strip().splitlines()
     )
 
     results = [x.strip() for x in results]
